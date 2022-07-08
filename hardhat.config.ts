@@ -1,8 +1,10 @@
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomiclabs/hardhat-etherscan";
-import {HardhatUserConfig, task} from "hardhat/config";
+import "@typechain/hardhat";
+import "hardhat-gas-reporter";
 import "dotenv/config";
 
+import {HardhatUserConfig, task} from "hardhat/config";
 import {createBurner, account, mnemonic} from "./scripts/wallet";
 
 const defaultNetwork = "hardhat";
@@ -18,6 +20,10 @@ const config: HardhatUserConfig = {
         mnemonic: mnemonic(defaultNetwork),
       },
     },
+  },
+  gasReporter: {
+    enabled: process.env.REPORT_GAS !== undefined,
+    currency: "USD",
   },
   etherscan: {
     apiKey: {
@@ -39,6 +45,14 @@ const config: HardhatUserConfig = {
     ],
   },
 };
+
+task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
+  const accounts = await hre.ethers.getSigners();
+
+  for (const account of accounts) {
+    console.log(account.address);
+  }
+});
 
 task("generate", "Create a deployment wallet", async () => {
   await createBurner();
